@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NickStyle ✨ Fancy Name Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --aurora1: #7c3aed;
+    --aurora2: #06b6d4;
+    --aurora3: #ec4899;
+    --aurora4: #f97316;
+    --bg: #0f0a1e;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --text: #f1f0ff;
+    --muted: #8b89a8;
+    --glass: rgba(124,58,237,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Aurora background ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(124,58,237,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, rgba(6,182,212,0.16) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 100%, rgba(236,72,153,0.14) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(15,10,30,0.7);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a78bfa, #38bdf8, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+
+  .tag {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .tag:hover, .tag.active {
+    background: rgba(124,58,237,0.25);
+    border-color: rgba(167,139,250,0.5);
+    color: #c4b5fd;
+  }
+
+  /* ─── HERO / INPUT ─── */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 56px 20px 32px;
+  }
+
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #a78bfa 0%, #38bdf8 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+  }
+
+  .input-wrap {
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 18px 120px 18px 22px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(167,139,250,0.3);
+    color: #fff;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-wrap input::placeholder { color: #5a5878; }
+  .input-wrap input:focus {
+    border-color: rgba(167,139,250,0.7);
+    box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+  }
+
+  .gen-btn {
+    position: absolute; right: 6px; top: 6px; bottom: 6px;
+    padding: 0 22px;
+    border-radius: 11px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .gen-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
+  /* ─── FILTER PILLS ─── */
+  .filter-bar {
+    position: relative; z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 0 20px 28px;
+  }
+
+  .pill {
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .pill-purple { background: rgba(124,58,237,0.18); color: #a78bfa; border-color: rgba(124,58,237,0.35); }
+  .pill-cyan   { background: rgba(6,182,212,0.15);  color: #38bdf8; border-color: rgba(6,182,212,0.35); }
+  .pill-pink   { background: rgba(236,72,153,0.15); color: #f472b6; border-color: rgba(236,72,153,0.35); }
+  .pill-orange { background: rgba(249,115,22,0.15); color: #fb923c; border-color: rgba(249,115,22,0.35); }
+  .pill-green  { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.35); }
+
+  .pill.active, .pill:hover { filter: brightness(1.25); transform: scale(1.04); }
+
+  /* ─── GRID ─── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 32px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .name-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 14px;
+    cursor: pointer;
+    transition: transform 0.18s, border-color 0.18s, background 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .name-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .name-card:hover { transform: translateY(-3px); border-color: rgba(167,139,250,0.4); background: rgba(124,58,237,0.08); }
+
+  .card-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .card-text {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    word-break: break-word;
+    min-height: 40px;
+  }
+
+  .card-footer {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .copy-btn {
+    padding: 5px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Inter', sans-serif;
+  }
+  .copy-btn:hover { background: rgba(167,139,250,0.15); color: #c4b5fd; border-color: rgba(167,139,250,0.4); }
+  .copy-btn.copied { background: rgba(16,185,129,0.2); color: #34d399; border-color: rgba(52,211,153,0.4); }
+
+  .deco-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Inter', sans-serif;
+  }
+  .deco-btn:hover { background: rgba(249,115,22,0.15); color: #fb923c; border-color: rgba(249,115,22,0.35); }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: rgba(52,211,153,0.15);
+    border: 1px solid rgba(52,211,153,0.35);
+    color: #34d399;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ─── Footer ─── */
+  footer {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: #a78bfa; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">✦ NickStyle</div>
+  <div class="nav-tags">
+    <span class="tag active">All</span>
+    <span class="tag">Gaming</span>
+    <span class="tag">Cute</span>
+    <span class="tag">Dark</span>
+    <span class="tag">Aesthetic</span>
+    <span class="tag">Classic</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>꧁ Fancy Name Generator ꧂</h1>
+  <p>Type your name → get 40+ stylish versions → copy & paste anywhere ✨</p>
+  <div class="input-wrap">
+    <input type="text" id="nameInput" placeholder="Enter your name & press Enter..." maxlength="30" />
+    <button class="gen-btn" onclick="generateNames()">✦ Generate</button>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span class="pill pill-purple active" onclick="filterSection('all', this)">⚡ All Styles</span>
+  <span class="pill pill-cyan" onclick="filterSection('gaming', this)">🎮 Gaming</span>
+  <span class="pill pill-pink" onclick="filterSection('cute', this)">🌸 Cute</span>
+  <span class="pill pill-orange" onclick="filterSection('dark', this)">🔥 Dark</span>
+  <span class="pill pill-green" onclick="filterSection('classic', this)">✍ Classic</span>
+</div>
+
+<!-- MAIN GRID -->
+<main id="mainGrid"></main>
+
+<!-- TOAST -->
+<div id="toast">✓ Copied to clipboard!</div>
+
+<footer>
+  Made with 💜 &nbsp;|&nbsp; Free to use &nbsp;|&nbsp; Works on PUBG · Free Fire · Instagram · WhatsApp
+</footer>
+
+<script>
+const STYLES = {
+  // ── GAMING ──
+  gaming: [
+    { label: "Gamer 1", fn: n => `꧁༒☬${cursive(n)}☬༒꧂` },
+    { label: "Gamer 2", fn: n => `★彡[${small_caps(n)}]彡★` },
+    { label: "Gamer 3", fn: n => `꧁༺${n.toUpperCase()}༻꧂` },
+    { label: "Text Gun", fn: n => `▄︻デ${strike(n)}══━一` },
+    { label: "Illuminati", fn: n => `𓂀 ${double_struck(n)} 𓂀` },
+    { label: "Bricks", fn: n => `▀▄▀▄ ${squares(n)} ▄▀▄▀` },
+    { label: "Gamer 4", fn: n => `꧁𓊈𒆜${n.toUpperCase()}𒆜𓊉꧂` },
+    { label: "Clan Tag", fn: n => `[${n.toUpperCase()}]★彡` },
+    { label: "BIG RUS", fn: n => `█▓▒░⡷⠂${n.toUpperCase()}⠐⢾░▒▓█` },
+    { label: "Fire Style", fn: n => `🔥${bold_italic(n)}🔥` },
+  ],
+  // ── CUTE ──
+  cute: [
+    { label: "Cute 1",   fn: n => `🍪⋆🎀 ${scriptify(n)} 🎀⋆🍪` },
+    { label: "Cute 2",   fn: n => `✩✶🎀 ${cursive(n)} 🎀✶✩` },
+    { label: "Kawaii",   fn: n => `(っ◔◡◔)っ ♥ ${cursive(n)} ♥` },
+    { label: "Ribbon",   fn: n => `🎀💕 ${scriptify(n)} 💕🎀` },
+    { label: "Flower",   fn: n => `-漫~*'¨ 🌸 ${cursive(n)} 🌸 ¨'*~舞-` },
+    { label: "Stars",    fn: n => `✨⭐ ${n} ⭐✨` },
+    { label: "Sakura",   fn: n => `🌸🌷 ${cursive(n)} 🌷🌸` },
+    { label: "Bunny",    fn: n => `🐰💖 ${scriptify(n)} 💖🐰` },
+    { label: "Sweet",    fn: n => `🍬🍭 ${cursive(n)} 🍭🍬` },
+    { label: "Dreamy",   fn: n => `💫☁️ ${scriptify(n)} ☁️💫` },
+  ],
+  // ── DARK ──
+  dark: [
+    { label: "Dark Lord",   fn: n => `꧁🔥${bold_italic(n)}🔥꧂` },
+    { label: "Demon",       fn: n => `⟨${strike(n)}⟩` },
+    { label: "Skull",       fn: n => `☠️${n.toUpperCase()}☠️` },
+    { label: "Shadow",      fn: n => `▄▀▄▀ ${n} ▀▄▀▄` },
+    { label: "Ghost",       fn: n => `👻${cursive(n)}👻` },
+    { label: "Blood",       fn: n => `🩸${bold(n)}🩸` },
+    { label: "Reaper",      fn: n => `༺☠ ${n.toUpperCase()} ☠༻` },
+    { label: "Poison",      fn: n => `⚗️ ${strike(n)} ⚗️` },
+    { label: "Abyss",       fn: n => `【${n.toUpperCase()}】` },
+    { label: "Night Lord",  fn: n => `🌑 ${bold_italic(n)} 🌑` },
+  ],
+  // ── CLASSIC ──
+  classic: [
+    { label: "Old English",    fn: n => old_english(n) },
+    { label: "Medieval",       fn: n => medieval(n) },
+    { label: "Cursive",        fn: n => cursive(n) },
+    { label: "Scriptify",      fn: n => scriptify(n) },
+    { label: "Double Struck",  fn: n => double_struck(n) },
+    { label: "Italic",         fn: n => italic(n) },
+    { label: "Bold Italic",    fn: n => bold_italic(n) },
+    { label: "Mono Space",     fn: n => mono(n) },
+    { label: "Bubbles",        fn: n => bubbles(n) },
+    { label: "WideText",       fn: n => wide(n) },
+    { label: "Bold",           fn: n => bold(n) },
+    { label: "Flip",           fn: n => flip(n) },
+    { label: "Small Caps",     fn: n => small_caps(n) },
+    { label: "Squares",        fn: n => squares(n) },
+  ]
+};
+
+// ── FONT MAPS ──
+const maps = {
+  cursive:      [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  cursiveOut:   [...'𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩'],
+  script:       [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  scriptOut:    [...'𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵'],
+  dstruck:      [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  dstruckOut:   [...'𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ'],
+  bold:         [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  boldOut:      [...'𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙'],
+  bolditalic:   [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  bolditalicOut:[...  '𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕'],
+  italic:       [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  italicOut:    [...'𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡'],
+  mono:         [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+  monoOut:      [...'𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉'],
+};
+
+function mapFont(str, inArr, outArr) {
+  return [...str].map(c => {
+    const i = inArr.indexOf(c);
+    return i >= 0 ? outArr[i] : c;
+  }).join('');
+}
+
+function cursive(n)      { return mapFont(n, maps.cursive,    maps.cursiveOut); }
+function scriptify(n)    { return mapFont(n, maps.script,     maps.scriptOut); }
+function double_struck(n){ return mapFont(n, maps.dstruck,    maps.dstruckOut); }
+function bold(n)         { return mapFont(n, maps.bold,       maps.boldOut); }
+function bold_italic(n)  { return mapFont(n, maps.bolditalic, maps.bolditalicOut); }
+function italic(n)       { return mapFont(n, maps.italic,     maps.italicOut); }
+function mono(n)         { return mapFont(n, maps.mono,       maps.monoOut); }
+
+const OE_IN  = [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const OE_OUT = [...'𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ'];
+function old_english(n)  { return mapFont(n, OE_IN, OE_OUT); }
+
+const MED_IN  = [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const MED_OUT = [...'𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅'];
+function medieval(n)     { return mapFont(n, MED_IN, MED_OUT); }
+
+function wide(n)  { return [...n].map(c => { const code = c.charCodeAt(0); if (code >= 33 && code <= 126) return String.fromCodePoint(code + 0xFEE0); return c; }).join(''); }
+function bubbles(n){ const b='ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ'; return [...n].map(c=>{const u=c.toUpperCase();const i=u.charCodeAt(0)-65;return i>=0&&i<26?(c===c.toLowerCase()?b[i+26]:b[i]):c}).join('');}
+function squares(n){ return [...n].map(c=>{const i=c.toUpperCase().charCodeAt(0)-65;return i>=0&&i<26?'🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉'.split('')[i]:c}).join('');}
+function small_caps(n){ const sc='ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀsᴛᴜᴠᴡxʏᴢ'; return [...n].map(c=>{const i=c.toUpperCase().charCodeAt(0)-65;return i>=0&&i<26?sc[i]:c}).join('');}
+function strike(n){ return [...n].map(c=>c+'\u0336').join('');}
+function flip(n)  { const table={'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'l','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z'}; return [...n.toLowerCase()].reverse().map(c=>table[c]||c).join('');}
+
+// ── RENDER ──
+let currentFilter = 'all';
+let currentName   = 'YourName';
+
+function generateNames() {
+  const raw = document.getElementById('nameInput').value.trim();
+  if (!raw) {
+    document.getElementById('nameInput').focus();
+    document.getElementById('nameInput').style.borderColor = 'rgba(236,72,153,0.7)';
+    setTimeout(() => document.getElementById('nameInput').style.borderColor = '', 1000);
+    return;
+  }
+  currentName = raw;
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('mainGrid');
+  grid.innerHTML = '';
+  const sections = currentFilter === 'all'
+    ? Object.keys(STYLES)
+    : [currentFilter];
+
+  sections.forEach(sec => {
+    const h = document.createElement('div');
+    h.className = 'section-title';
+    h.textContent = { gaming:'🎮 Gaming', cute:'🌸 Cute', dark:'🔥 Dark', classic:'✍ Classic' }[sec];
+    grid.appendChild(h);
+
+    const g = document.createElement('div');
+    g.className = 'cards-grid';
+
+    STYLES[sec].forEach(s => {
+      const styled = s.fn(currentName);
+      const card = document.createElement('div');
+      card.className = 'name-card';
+      card.innerHTML = `
+        <div class="card-label">${s.label}</div>
+        <div class="card-text">${styled}</div>
+        <div class="card-footer">
+          <button class="copy-btn" onclick="copyText(this, \`${styled.replace(/`/g,'\\`')}\`)">⎘ Copy</button>
+          <button class="deco-btn" onclick="addDeco(this, \`${styled.replace(/`/g,'\\`')}\`)">✦ Deco</button>
+        </div>
+      `;
+      g.appendChild(card);
+    });
+    grid.appendChild(g);
+  });
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 1800);
+    showToast();
+  });
+}
+
+function addDeco(btn, text) {
+  const decos = ['꧁༒☬ {t} ☬༒꧂','★彡 {t} 彡★','✦ {t} ✦','🔥 {t} 🔥','💜 {t} 💜'];
+  const d = decos[Math.floor(Math.random() * decos.length)].replace('{t}', text);
+  navigator.clipboard.writeText(d).then(showToast);
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function filterSection(f, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = f;
+  renderGrid();
+}
+
+// Enter key support
+document.getElementById('nameInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') generateNames();
+});
+
+// Nav tags
+document.querySelectorAll('.tag').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+// Empty state on load - no auto generate
+document.getElementById('mainGrid').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:3rem;margin-bottom:16px">✨</div><div style="font-size:1.05rem;font-weight:600;color:#a78bfa;margin-bottom:8px">உங்கள் பெயரை type பண்ணுங்க!</div><div style="font-size:0.82rem">Type your name above and press <b style="color:#c4b5fd">Enter</b> or click <b style="color:#c4b5fd">✦ Generate</b></div></div>';
+</script>
+</body>
+</html>
