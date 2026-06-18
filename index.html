@@ -29,7 +29,6 @@
     overflow-x: hidden;
   }
 
-  /* ─── Aurora background ─── */
   body::before {
     content: '';
     position: fixed;
@@ -66,6 +65,13 @@
     letter-spacing: -0.5px;
   }
 
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
   .nav-tags {
     display: flex; flex-wrap: wrap; gap: 6px;
   }
@@ -86,6 +92,38 @@
     background: rgba(124,58,237,0.25);
     border-color: rgba(167,139,250,0.5);
     color: #c4b5fd;
+  }
+
+  /* ── FAV LINK ── */
+  .fav-link {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(236,72,153,0.12);
+    border: 1px solid rgba(244,114,182,0.3);
+    color: #f472b6;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .fav-link:hover {
+    background: rgba(236,72,153,0.22);
+    border-color: rgba(244,114,182,0.55);
+  }
+  .fav-link .fav-badge {
+    background: #f472b6;
+    color: #0f0a1e;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 6px;
+    min-width: 18px;
+    text-align: center;
   }
 
   /* ─── HERO / INPUT ─── */
@@ -218,17 +256,10 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px 18px 14px;
-    cursor: pointer;
+    cursor: default;
     transition: transform 0.18s, border-color 0.18s, background 0.18s;
     position: relative;
     overflow: hidden;
-  }
-  .name-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.2s;
   }
   .name-card:hover { transform: translateY(-3px); border-color: rgba(167,139,250,0.4); background: rgba(124,58,237,0.08); }
 
@@ -253,6 +284,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 6px;
   }
 
   .copy-btn {
@@ -283,6 +315,22 @@
   }
   .deco-btn:hover { background: rgba(249,115,22,0.15); color: #fb923c; border-color: rgba(249,115,22,0.35); }
 
+  /* ── HEART BUTTON ── */
+  .heart-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Inter', sans-serif;
+    line-height: 1;
+  }
+  .heart-btn:hover { background: rgba(236,72,153,0.15); border-color: rgba(244,114,182,0.4); transform: scale(1.1); }
+  .heart-btn.saved { color: #f472b6; border-color: rgba(244,114,182,0.5); background: rgba(236,72,153,0.12); }
+
   /* ─── TOAST ─── */
   #toast {
     position: fixed;
@@ -301,6 +349,11 @@
     pointer-events: none;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.pink {
+    background: rgba(236,72,153,0.15);
+    border-color: rgba(244,114,182,0.35);
+    color: #f472b6;
+  }
 
   /* ─── Footer ─── */
   footer {
@@ -311,7 +364,6 @@
     font-size: 0.75rem;
     border-top: 1px solid var(--border);
   }
-  footer a { color: #a78bfa; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -319,13 +371,18 @@
 <!-- NAV -->
 <nav>
   <div class="logo">✦ NickStyle</div>
-  <div class="nav-tags">
-    <span class="tag active">All</span>
-    <span class="tag">Gaming</span>
-    <span class="tag">Cute</span>
-    <span class="tag">Dark</span>
-    <span class="tag">Aesthetic</span>
-    <span class="tag">Classic</span>
+  <div class="nav-right">
+    <div class="nav-tags">
+      <span class="tag active">All</span>
+      <span class="tag">Gaming</span>
+      <span class="tag">Cute</span>
+      <span class="tag">Dark</span>
+      <span class="tag">Aesthetic</span>
+      <span class="tag">Classic</span>
+    </div>
+    <a class="fav-link" href="favorites.html">
+      ❤️ Favorites <span class="fav-badge" id="navBadge">0</span>
+    </a>
   </div>
 </nav>
 
@@ -359,8 +416,41 @@
 </footer>
 
 <script>
+const STORAGE_KEY = 'nickstyle_favorites';
+
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveFavorites(favs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+}
+function updateBadge() {
+  document.getElementById('navBadge').textContent = getFavorites().length;
+}
+
+function toggleFavorite(btn, text, label, category) {
+  const favs = getFavorites();
+  const idx  = favs.findIndex(f => f.text === text);
+
+  if (idx >= 0) {
+    // Already saved → remove
+    favs.splice(idx, 1);
+    btn.textContent = '🤍';
+    btn.classList.remove('saved');
+    showToast('Removed from favorites', false);
+  } else {
+    // Save it
+    favs.push({ text, label, category, savedAt: Date.now() });
+    btn.textContent = '❤️';
+    btn.classList.add('saved');
+    showToast('❤️ Saved to favorites!', true);
+  }
+  saveFavorites(favs);
+  updateBadge();
+}
+
 const STYLES = {
-  // ── GAMING ──
   gaming: [
     { label: "Gamer 1", fn: n => `꧁༒☬${cursive(n)}☬༒꧂` },
     { label: "Gamer 2", fn: n => `★彡[${small_caps(n)}]彡★` },
@@ -373,7 +463,6 @@ const STYLES = {
     { label: "BIG RUS", fn: n => `█▓▒░⡷⠂${n.toUpperCase()}⠐⢾░▒▓█` },
     { label: "Fire Style", fn: n => `🔥${bold_italic(n)}🔥` },
   ],
-  // ── CUTE ──
   cute: [
     { label: "Cute 1",   fn: n => `🍪⋆🎀 ${scriptify(n)} 🎀⋆🍪` },
     { label: "Cute 2",   fn: n => `✩✶🎀 ${cursive(n)} 🎀✶✩` },
@@ -386,7 +475,6 @@ const STYLES = {
     { label: "Sweet",    fn: n => `🍬🍭 ${cursive(n)} 🍭🍬` },
     { label: "Dreamy",   fn: n => `💫☁️ ${scriptify(n)} ☁️💫` },
   ],
-  // ── DARK ──
   dark: [
     { label: "Dark Lord",   fn: n => `꧁🔥${bold_italic(n)}🔥꧂` },
     { label: "Demon",       fn: n => `⟨${strike(n)}⟩` },
@@ -399,7 +487,6 @@ const STYLES = {
     { label: "Abyss",       fn: n => `【${n.toUpperCase()}】` },
     { label: "Night Lord",  fn: n => `🌑 ${bold_italic(n)} 🌑` },
   ],
-  // ── CLASSIC ──
   classic: [
     { label: "Old English",    fn: n => old_english(n) },
     { label: "Medieval",       fn: n => medieval(n) },
@@ -418,7 +505,6 @@ const STYLES = {
   ]
 };
 
-// ── FONT MAPS ──
 const maps = {
   cursive:      [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
   cursiveOut:   [...'𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩'],
@@ -429,7 +515,7 @@ const maps = {
   bold:         [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
   boldOut:      [...'𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙'],
   bolditalic:   [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
-  bolditalicOut:[...  '𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕'],
+  bolditalicOut:[...'𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕'],
   italic:       [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
   italicOut:    [...'𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡'],
   mono:         [...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'],
@@ -466,7 +552,6 @@ function small_caps(n){ const sc='ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯ�
 function strike(n){ return [...n].map(c=>c+'\u0336').join('');}
 function flip(n)  { const table={'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'l','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z'}; return [...n.toLowerCase()].reverse().map(c=>table[c]||c).join('');}
 
-// ── RENDER ──
 let currentFilter = 'all';
 let currentName   = 'YourName';
 
@@ -485,9 +570,8 @@ function generateNames() {
 function renderGrid() {
   const grid = document.getElementById('mainGrid');
   grid.innerHTML = '';
-  const sections = currentFilter === 'all'
-    ? Object.keys(STYLES)
-    : [currentFilter];
+  const favs    = getFavorites();
+  const sections = currentFilter === 'all' ? Object.keys(STYLES) : [currentFilter];
 
   sections.forEach(sec => {
     const h = document.createElement('div');
@@ -499,7 +583,9 @@ function renderGrid() {
     g.className = 'cards-grid';
 
     STYLES[sec].forEach(s => {
-      const styled = s.fn(currentName);
+      const styled  = s.fn(currentName);
+      const isSaved = favs.some(f => f.text === styled);
+
       const card = document.createElement('div');
       card.className = 'name-card';
       card.innerHTML = `
@@ -508,6 +594,9 @@ function renderGrid() {
         <div class="card-footer">
           <button class="copy-btn" onclick="copyText(this, \`${styled.replace(/`/g,'\\`')}\`)">⎘ Copy</button>
           <button class="deco-btn" onclick="addDeco(this, \`${styled.replace(/`/g,'\\`')}\`)">✦ Deco</button>
+          <button class="heart-btn ${isSaved ? 'saved' : ''}"
+            onclick="toggleFavorite(this, \`${styled.replace(/`/g,'\\`')}\`, '${s.label}', '${sec}')"
+          >${isSaved ? '❤️' : '🤍'}</button>
         </div>
       `;
       g.appendChild(card);
@@ -521,19 +610,20 @@ function copyText(btn, text) {
     btn.textContent = '✓ Copied!';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 1800);
-    showToast();
+    showToast('✓ Copied to clipboard!', false);
   });
 }
 
 function addDeco(btn, text) {
   const decos = ['꧁༒☬ {t} ☬༒꧂','★彡 {t} 彡★','✦ {t} ✦','🔥 {t} 🔥','💜 {t} 💜'];
   const d = decos[Math.floor(Math.random() * decos.length)].replace('{t}', text);
-  navigator.clipboard.writeText(d).then(showToast);
+  navigator.clipboard.writeText(d).then(() => showToast('✓ Deco copied!', false));
 }
 
-function showToast() {
+function showToast(msg, pink) {
   const t = document.getElementById('toast');
-  t.classList.add('show');
+  t.textContent = msg || '✓ Done!';
+  t.className = pink ? 'pink show' : 'show';
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
@@ -544,12 +634,10 @@ function filterSection(f, el) {
   renderGrid();
 }
 
-// Enter key support
 document.getElementById('nameInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') generateNames();
 });
 
-// Nav tags
 document.querySelectorAll('.tag').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
@@ -557,7 +645,8 @@ document.querySelectorAll('.tag').forEach(t => {
   });
 });
 
-// Empty state on load - no auto generate
+// Init
+updateBadge();
 document.getElementById('mainGrid').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:3rem;margin-bottom:16px">✨</div><div style="font-size:1.05rem;font-weight:600;color:#a78bfa;margin-bottom:8px">உங்கள் பெயரை type பண்ணுங்க!</div><div style="font-size:0.82rem">Type your name above and press <b style="color:#c4b5fd">Enter</b> or click <b style="color:#c4b5fd">✦ Generate</b></div></div>';
 </script>
 </body>
