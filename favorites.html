@@ -341,7 +341,7 @@
 <!-- HERO -->
 <section class="hero">
   <h1>❤️ My Favorites</h1>
-  <p>உங்கள் saved styles எல்லாம் இங்க இருக்கும்</p>
+  <p>Your saved styles, all in one place ✨</p>
   <div class="hero-count" id="favCount">0 styles saved</div>
 </section>
 
@@ -401,7 +401,7 @@
   }
 
   function clearAll() {
-    if (!confirm('All favorites delete aagidum. Sure?')) return;
+    if (!confirm('All favorites will be deleted. Are you sure?')) return;
     localStorage.removeItem(STORAGE_KEY);
     renderFavorites();
   }
@@ -431,7 +431,7 @@
         <div class="empty-state">
           <div class="emoji">💔</div>
           <h2>No favorites yet!</h2>
-          <p>Generator-la name type panni,<br>cards-la ❤️ button click pannunga.</p>
+          <p>Go to the generator, type your name,<br>and click ❤️ on any style to save it.</p>
           <a class="go-btn" href="index.html">✦ Generate Names</a>
         </div>`;
       return;
@@ -493,4 +493,3 @@
 </script>
 </body>
 </html>
-
